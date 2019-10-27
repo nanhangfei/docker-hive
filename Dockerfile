@@ -16,13 +16,19 @@ ENV HADOOP_HOME /opt/hadoop-$HADOOP_VERSION
 
 WORKDIR /opt
 
+RUN rm /etc/apt/sources.list
+RUN echo "deb http://archive.debian.org/debian/ jessie main" | tee -a /etc/apt/sources.list
+RUN echo "deb-src http://archive.debian.org/debian/ jessie main" | tee -a /etc/apt/sources.list
+RUN echo "Acquire::Check-Valid-Until false;" | tee -a /etc/apt/apt.conf.d/10-nocheckvalid
+RUN echo 'Package: *\nPin: origin "archive.debian.org"\nPin-Priority: 500' | tee -a /etc/apt/preferences.d/10-archive-pin
+
 #Install Hive and MySQL JDBC
 RUN apt-get update && apt-get install -y wget procps && \
 	wget https://archive.apache.org/dist/hive/hive-$HIVE_VERSION/apache-hive-$HIVE_VERSION-bin.tar.gz && \
 	tar -xzvf apache-hive-$HIVE_VERSION-bin.tar.gz && \
 	mv apache-hive-$HIVE_VERSION-bin hive && \
 	wget https://cdn.mysql.com//Downloads/Connector-J/mysql-connector-java-8.0.18.tar.gz && \
-	tar -xzvf mysql-connector-java-8.0.18.tar && \
+	tar -xzvf mysql-connector-java-8.0.18.tar.gz && \
 	mv mysql-connector-java-8.0.18/mysql-connector-java-8.0.18.jar $HIVE_HOME/lib/ && \
 	rm apache-hive-$HIVE_VERSION-bin.tar.gz && \
 	apt-get --purge remove -y wget && \
